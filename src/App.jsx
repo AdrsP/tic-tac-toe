@@ -7,15 +7,26 @@ import { WinnerModal } from "./components/WinnerModal.jsx"
 
 function App() {
 
-  const [board, setBoard] = useState(
-    Array(9).fill(null))                    //se crea un array de 9 posiciones con el valor null en cada posicion
-  const [turn, setTurn] = useState(TURNS.X) //inicializa con el estado del objeto TURNS en su propiedad X osea un string con 'x' 
+  const [board, setBoard] = useState(()=>{
+    const boardFromLocalStorage = window.localStorage.getItem('board')
+    return boardFromLocalStorage ? JSON.parse(boardFromLocalStorage) :
+    Array(9).fill(null)                      //se crea un array de 9 posiciones con el valor null en cada posicion
+  })                    
+  const [turn, setTurn] = useState(() => {
+    const turnFromLocalStorage = window.localStorage.getItem('turn')
+    return turnFromLocalStorage ? JSON.parse(turnFromLocalStorage) :
+    TURNS.X //inicializa con el estado del objeto TURNS en su propiedad X osea un string con 'x' 
+  }
+  )  
   const [winner, setWinner] = useState(null) // null no hay ganador, false empate
 
-  const resetGame = () => {                 // esta funcion debe reiniciar todos los hooks a su estado inicial
+  const resetGame = () => {                  // esta funcion debe reiniciar todos los hooks a su estado inicial
     setBoard(Array(9).fill(null))
     setTurn(TURNS.X)
     setWinner(null)
+    window.localStorage.removeItem('board')
+    window.localStorage.removeItem('turn')
+
   }
 
   const updateBoard = (index) => {
@@ -27,6 +38,9 @@ function App() {
     // actualizar el turno
     const newTurn = turn === TURNS.X ? TURNS.O : TURNS.X
     setTurn(newTurn)
+    // guardar partida 
+    window.localStorage.setItem('board', JSON.stringify(newBoard))
+    window.localStorage.setItem('turn', JSON.stringify(newTurn))
     // revisar si hay un ganador
     const newWinner = checkWinnerFrom(newBoard)
     if (newWinner) {
